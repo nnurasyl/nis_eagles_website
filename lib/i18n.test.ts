@@ -17,7 +17,7 @@ test('Kazakh is the default; all three languages have complete non-empty copy', 
 });
 
 test('Every literal interface key, category, and government role has translations', () => {
-  const source = fs.readFileSync(new URL('../components/eagles-app.tsx', import.meta.url), 'utf8');
+  const source = ['eagles-app.tsx','account-pages.tsx'].map(file=>fs.readFileSync(new URL('../components/'+file, import.meta.url),'utf8')).join('\n');
   const tree = ts.createSourceFile('eagles-app.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   function visit(node: ts.Node) {
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 't' && ts.isStringLiteral(node.arguments[0])) {
@@ -48,4 +48,15 @@ test('Auth failures are localized without exposing raw internal errors', () => {
   assert.equal(authError({code: 'invalid_credentials'}, 'ru'), 'Неверная почта или пароль.');
   assert.equal(authError({message: 'Failed to fetch'}, 'kk'), 'Байланыс үзілді. Интернетті тексеріп, қайта көр.');
   assert.equal(authError({message: 'internal database details'}, 'en'), 'Something went wrong. Please try again.');
+});
+
+test('SMTP and database signup failures get distinct localized messages', () => {
+  for (const language of ['kk', 'ru', 'en'] as const) {
+    assert.equal(authError({code: 'unexpected_failure', status: 500, message: 'Error sending confirmation email'}, language), translate(language, 'Email delivery failed'));
+    assert.equal(authError({code: 'unexpected_failure', status: 500, message: 'Database error saving new user'}, language), translate(language, 'Account setup failed'));
+  }
+  assert.equal(authError({message: 'Dial tcp: address http://127.0.0.1:3000:465: too many colons in address'}, 'ru'), translate('ru', 'Email delivery failed'));
+  assert.equal(authError({code: 'unexpected_failure', status: 500, message: 'private database details'}, 'en'), 'Something went wrong. Please try again.');
+  assert.equal(authError({status: 429, message: 'retry in 42 seconds'}, 'kk'), translate('kk', 'Too many requests'));
+  assert.equal(authError(null, 'en'), 'Something went wrong. Please try again.');
 });

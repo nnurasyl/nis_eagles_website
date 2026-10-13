@@ -40,8 +40,8 @@ do $$ begin
   exception when insufficient_privilege then null; end;
   delete from public.clubs where name='Security Test Club';
   if not exists(select 1 from public.clubs where name='Security Test Club') then raise exception 'FAIL: non-owner deleted club'; end if;
-  update public.shanyraks set points=99 where id=1;
-  if (select points from public.shanyraks where id=1) <> 0 then raise exception 'FAIL: ordinary student changed scores'; end if;
+  update public.shanyraks set points=99 where id=2;
+  if (select points from public.shanyraks where id=2) <> 0 then raise exception 'FAIL: ordinary student changed scores'; end if;
 end $$;
 delete from public.club_members where user_id=auth.uid();
 do $$ begin
@@ -60,10 +60,10 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 insert into public.events(title,description,location,starts_at,published)
 values('Authorized event','An event correctly published by a school administrator.','Auditorium',now()+interval '1 day',true);
-update public.shanyraks set points=10 where id=1;
+update public.shanyraks set points=10 where id=2;
 do $$ begin
   if not exists(select 1 from public.events where title='Authorized event') then raise exception 'FAIL: administrator cannot publish'; end if;
-  if (select points from public.shanyraks where id=1) <> 10 then raise exception 'FAIL: administrator cannot update points'; end if;
+  if (select points from public.shanyraks where id=2) <> 10 then raise exception 'FAIL: administrator cannot update points'; end if;
 end $$;
 reset role;
 rollback;

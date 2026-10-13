@@ -1,3 +1,4 @@
+import {accountMessages} from './account-copy';
 import {create} from 'zustand';
 
 export type Language = 'kk' | 'ru' | 'en';
@@ -7,6 +8,7 @@ export function isLanguage(value: unknown): value is Language {return value === 
 
 // Keys are the original interface copy. Names and student-authored content stay intact.
 export const messages: Record<string, readonly [string, string, string]> = {
+  ...accountMessages,
   'Home': ['Басты бет', 'Главная', 'Home'],
   'Клубы': ['Клубтар', 'Клубы', 'Clubs'],
   'Shanyraks': ['Шаңырақтар', 'Шаныраки', 'Shanyraks'],
@@ -200,6 +202,9 @@ export const messages: Record<string, readonly [string, string, string]> = {
   'User already registered': ['Бұл поштаға тіркелгі ашылған.', 'Эта почта уже зарегистрирована.', 'This email is already registered.'],
   'Email rate limit exceeded': ['Хат жіберу шегіне жетті. Кейінірек қайтала.', 'Лимит отправки писем исчерпан. Попробуй позже.', 'Email limit reached. Please try later.'],
   'Email address not authorized': ['Бұл мекенжайға хат жіберу рұқсат етілмеген. Әкімшіге хабарлас.', 'Отправка на этот адрес не разрешена. Обратись к администратору.', 'Email delivery to this address is not authorized. Contact the administrator.'],
+  'Email delivery failed': ['Хат жіберілмеді. Әкімшіге хабарлас немесе кейінірек қайталап көр.', 'Не удалось отправить письмо. Обратись к администратору или попробуй позже.', 'We could not send the email. Contact the administrator or try again later.'],
+  'Account setup failed': ['Тіркелгі ашылмады. Әкімшіге хабарлас.', 'Не удалось создать аккаунт. Обратись к администратору.', 'We could not create your account. Contact the administrator.'],
+  'Too many requests': ['Әрекеттер тым көп. Бірнеше минуттан кейін қайталап көр.', 'Слишком много попыток. Попробуй через несколько минут.', 'Too many attempts. Please try again in a few minutes.'],
   'Failed to fetch': ['Байланыс үзілді. Интернетті тексеріп, қайта көр.', 'Нет связи. Проверь интернет и попробуй снова.', 'Connection failed. Check your internet and try again.'],
 };
 
@@ -221,9 +226,16 @@ export function useTranslation() {
   return {language, locale: LOCALES[language], t: (key: string) => translate(language, key)};
 }
 export function authError(error: unknown, language: Language): string {
-  const value = error as {code?: string; message?: string};
-  const keys: Record<string, string> = {invalid_credentials: 'Invalid login credentials', email_not_confirmed: 'Email not confirmed', user_already_exists: 'User already registered', over_email_send_rate_limit: 'Email rate limit exceeded', email_address_not_authorized: 'Email address not authorized'};
-  const key = keys[value?.code ?? ''] ?? value?.message ?? '';
+  const value = error as {code?: string; message?: string; status?: number} | null;
+  const keys: Record<string, string> = {invalid_credentials: 'Invalid login credentials', email_not_confirmed: 'Email not confirmed', user_already_exists: 'User already registered', over_email_send_rate_limit: 'Email rate limit exceeded', over_request_rate_limit: 'Too many requests', email_address_not_authorized: 'Email address not authorized'};
+  const message = typeof value?.message === 'string' ? value.message.trim() : '';
+  let key = keys[value?.code ?? ''] ?? message;
+  // Generic server codes can represent different failures; classify only known messages.
+  if (!keys[value?.code ?? '']) {
+    if (/^Error sending (confirmation|recovery|magic link|email change) email$/i.test(message) || /^dial tcp: address .*: too many colons in address$/i.test(message)) key = 'Email delivery failed';
+    else if (/^Database error saving new user$/i.test(message)) key = 'Account setup failed';
+    else if (value?.status === 429) key = 'Too many requests';
+  }
   return translate(language, Object.hasOwn(messages, key) ? key : 'Something went wrong. Please try again.');
 }
 export function memberCount(count: number, language: Language): string {

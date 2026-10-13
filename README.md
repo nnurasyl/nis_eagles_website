@@ -9,7 +9,7 @@ A responsive student government website for NIS Almaty-Nauryzbay. Built with Nex
 - Shanyraks are described as unions of two, three, or four classes.
 - Responsive desktop/mobile navigation, bold typography, animation with reduced-motion support, keyboard-accessible dialogs, search and category filters.
 - Kazakh (default), Russian, and English interface; language choice persists locally. All navigation, forms, status messages, categories, roles, date formatting, and participant counts are localized. People/Shanyrak names and student-written club/event content keep their original spelling.
-- School-only email/password registration, email verification, sign-in/out, password recovery, private names/profiles.
+- School-only registration, email verification, sign-in/out, password recovery with confirmation, editable profile names/passwords, and self-account deletion.
 - Student-created clubs, school-only membership, founder membership automatically added, accurate member counts, and founder deletion.
 - Events on the homepage: an Events heading and a clear “Пока событий нет.” message when there are none, event details and calendar downloads when published. Administrators can publish and remove events.
 - Separate `/clubs`, `/shanyraks`, and `/ministries` pages, keeping the homepage focused on a brief welcome, three navigation links, and events.
@@ -47,19 +47,9 @@ On Windows PowerShell, use `Copy-Item .env.example .env.local`. Open http://127.
 4. In Authentication → Providers, enable Email and **keep Confirm email enabled**. Set the minimum password length to **10**. The database also independently requires verified school email before any student can create or join clubs.
 5. In Authentication → URL Configuration, set Site URL to the deployed website URL. Add the exact deployed homepage URL and `http://127.0.0.1:3000` to Redirect URLs. Sign-up confirmations and password reset emails return to the homepage; the browser handles the recovery session and opens the new-password form.
 6. Configure [custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) for real students. Supabase's default email service is for testing and restricts recipients; production school verification needs a working email provider. Keep the built-in confirmation/reset email links (`{{ .ConfirmationURL }}`).
-7. Register your administrator using their actual `@hbalm.nis.edu.kz` email and verify it. Run this in the SQL Editor, replacing the example:
-
-   ```sql
-   update public.profiles
-   set is_admin = true
-   where id = (
-     select id from auth.users
-     where lower(email) = 'your.admin@hbalm.nis.edu.kz'
-       and email_confirmed_at is not null
-   );
-   ```
-
-   Sign out/in after promoting the administrator. They will see **Add event** beside the events heading. Students cannot grant themselves administrator access.
+7. Run **supabase/profile-admin.sql** after the base schema. For the existing connected school project, run only this additive migration; do not rerun schema.sql. It adds private profile actions, ownership and role management, editable Shanyrak leaders, and the government roster.
+8. Register and verify **qurmangali_n63@hbalm.nis.edu.kz**, then run **supabase/grant-owner.sql** once. Ownership is protected; it can later be transferred to a verified administrator from the control panel.
+9. Open the account menu → **My profile → Admin**. Manage published/draft events, clubs, scores, community leaders/archives, the government roster, and administrator roles. Public pages have no extra administration controls. School members cannot promote themselves.
 
 ## Deploy to Vercel
 
@@ -73,7 +63,7 @@ Vercel hosting does not create a database or email service automatically. The ab
 
 ## Update Shanyrak points
 
-All scores begin at zero. An authorized administrator can update them in the Supabase Table Editor, or through the SQL Editor:
+All scores begin at zero. Administrators can edit points and leaders in **My profile → Admin → Shanyraks**, or use the Supabase SQL Editor:
 
 ```sql
 update public.shanyraks set points = 10 where name = 'Алаш';
@@ -106,4 +96,13 @@ The production build uses Next.js Webpack (`next build --webpack`) to avoid a lo
 - [Next.js deployment on Vercel](https://vercel.com/docs/frameworks/full-stack/nextjs)
 
 
-Current roster: 19 Shanyraks. Алатау is excluded from site queries, including existing Supabase projects. Existing stored rows are preserved. The homepage and ranking heading derive their community count from the loaded roster.
+Current roster: 19 Shanyraks. Алатау is archived by the migration and excluded from public pages, including existing Supabase projects. Existing stored rows are preserved. The homepage and ranking heading derive their community count from the loaded roster.
+
+## Profile and admin update
+
+- **My profile** changes names through a caller-only database function. Password changes require the current password. Account deletion requires both the current password and typed school email, then removes the account and its clubs/memberships through a caller-only database function.
+- Verified admins may grant/revoke roles of other verified school accounts. The owner is protected from role revocation; self-demotion is disabled and the last verified administrator cannot delete their account. The owner must transfer ownership before deleting their account.
+- Passwords stay in Supabase Auth. No service-role credential is shipped to the browser. Every administrator operation is guarded by database authorization. User names/emails are available only to verified administrators through a bounded private search function.
+- The single local **Onest** variable font covers all Kazakh uppercase/lowercase letters; its OFL license is bundled in public/fonts.
+- Changing email is intentionally unavailable: accounts remain restricted to the school domain.
+
