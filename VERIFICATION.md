@@ -88,3 +88,11 @@ The user requested recovery on www.niseagles.study for qurmangali_n63@hbalm.nis.
 - Language labels now reserve space for the right arrow and sit approximately 5 px left of the whole control center. Height and vertical alignment are preserved.
 - Live database migration is awaiting the action-time confirmation; source changes require a new Vercel deployment.
 - Follow-up presentation changes remove the personal-email and no-SMS helper text from registration/profile in all languages, and remove the decorative season dot from Shanyrak standings. Production build passed after both edits; the live local page visibly shows the season without the dot.
+
+
+## Signup failure diagnosis — 2026-10-14
+
+- Read the actual Auth /signup failure in Supabase, request 01a136c5-a1fe-7ae6-9d5b-e53baefcc2a7. HTTP 500 is caused by the unchanged school-email trigger: Only @hbalm.nis.edu.kz school accounts are allowed. The request origin is https://www.niseagles.study.
+- The personal-email form is published but open-email-registration.sql has not yet run. The SQL editor still shows Click Run to execute your query. Action-time confirmation for expanding enrollment is pending; no SMTP change or password action is needed for this failure.
+
+- After the user confirmed Apply now, executed open-email-registration.sql on the live production database. SQL Editor returned Success. No rows returned. All 11 read-only checks passed: personal/school emails, invalid-email rejection, old trigger removal, new trigger enabled, contact column, confirmation requirement, profile RLS, anonymous directory/contact edits denied, and owner/admin preserved. This supersedes the pending-migration notes above. End-to-end signup with a real email/password is left to the user; no credentials entered or email sent by the agent.
