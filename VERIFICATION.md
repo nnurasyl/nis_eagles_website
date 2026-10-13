@@ -72,3 +72,19 @@ The running project is C:/Users/Lenovo/Desktop/nis-eagles on http://127.0.0.1:30
 - Nine unit tests, TypeScript and the production build pass.
 
 - A normal-student fixture cannot enter /admin and has no Admin profile link. Password mismatches are rejected before making an Auth request. The self-deletion form starts disabled until the school email is typed. The profile recovery modal is accessible. Auth dialogs retain their mode during exit animations, preventing a sign-in title flash on close.
+
+## Recovery-email delivery investigation — 2026-10-14
+
+The user requested recovery on www.niseagles.study for qurmangali_n63@hbalm.nis.edu.kz. Resend shows the actual latest recovery email as Delivered. Microsoft 365 acknowledged it with SMTP 250 2.6.0 and Queued mail for delivery; the captured server message ID and InternalId are recorded in SUPABASE-EMAIL-SETUP.md for school IT tracing. The sender is no-reply@niseagles.study, display name Nurassyl - IT Ministry. Inbox placement remains unverified; the user is checking Microsoft quarantine. No password-reset links were opened, no credentials changed, and no extra email was sent.
+
+
+## Personal email and contact phone — 2026-10-14
+
+- Direct Desktop source changes accept valid personal and school email addresses in registration, login, recovery and Auth session handling. Email confirmation remains required.
+- New registration asks for an international contact number; profile supports adding, editing and clearing it. No SMS provider or verification is used. The number is private to the owner and admins and grants no authentication privileges.
+- open-email-registration.sql is additive and rollout-compatible: old accounts and clients may have a null phone; current signup requires a phone. The old admin directory RPC is preserved; admin_list_contacts adds private contact access.
+- Ten unit tests, TypeScript and optimized production build pass. Isolated PGlite checks cover personal/school email validation, confirmation requirements, private contacts, role protection, club create/join, event management, deletion cascades and migration reruns. No real account was created/deleted or recovery email sent during these tests.
+- Isolated browser fixture confirms personal-email profile loading and formatted contact saving. Registration was checked on mobile at 390 px in kk/ru/en and laptop at 1366 px; fields fit without horizontal overflow.
+- Language labels now reserve space for the right arrow and sit approximately 5 px left of the whole control center. Height and vertical alignment are preserved.
+- Live database migration is awaiting the action-time confirmation; source changes require a new Vercel deployment.
+- Follow-up presentation changes remove the personal-email and no-SMS helper text from registration/profile in all languages, and remove the decorative season dot from Shanyrak standings. Production build passed after both edits; the live local page visibly shows the season without the dot.

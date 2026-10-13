@@ -9,7 +9,7 @@ A responsive student government website for NIS Almaty-Nauryzbay. Built with Nex
 - Shanyraks are described as unions of two, three, or four classes.
 - Responsive desktop/mobile navigation, bold typography, animation with reduced-motion support, keyboard-accessible dialogs, search and category filters.
 - Kazakh (default), Russian, and English interface; language choice persists locally. All navigation, forms, status messages, categories, roles, date formatting, and participant counts are localized. People/Shanyrak names and student-written club/event content keep their original spelling.
-- School-only registration, email verification, sign-in/out, password recovery with confirmation, editable profile names/passwords, and self-account deletion.
+- Personal or school email registration, email verification, sign-in/out, password recovery with confirmation, editable profile names/passwords, and self-account deletion.
 - Student-created clubs, school-only membership, founder membership automatically added, accurate member counts, and founder deletion.
 - Events on the homepage: an Events heading and a clear “Пока событий нет.” message when there are none, event details and calendar downloads when published. Administrators can publish and remove events.
 - Separate `/clubs`, `/shanyraks`, and `/ministries` pages, keeping the homepage focused on a brief welcome, three navigation links, and events.
@@ -33,8 +33,8 @@ On Windows PowerShell, use `Copy-Item .env.example .env.local`. Open http://127.
 
 ## Connect the school database (one-time setup)
 
-1. Create a [Supabase project](https://supabase.com/dashboard). Use a **new project dedicated to this school**: the schema intentionally prevents non-school accounts throughout its Auth service.
-2. In its SQL Editor, run **`supabase/schema.sql` once**. This creates profiles, clubs, private memberships, events, and the 19 zero-point Shanyraks, plus row-level permissions and server-side school-domain checks.
+1. Create a [Supabase project](https://supabase.com/dashboard). Use a **new project dedicated to this school**: keep school community data in a dedicated project.
+2. In its SQL Editor, run **`supabase/schema.sql` once**. This creates profiles, clubs, private memberships, events, and the 19 zero-point Shanyraks, plus row-level permissions and server-side email verification checks after the migration below.
 3. From the project Connect/API settings, copy the project URL and **publishable key** into `.env.local`:
 
    ```dotenv
@@ -44,12 +44,13 @@ On Windows PowerShell, use `Copy-Item .env.example .env.local`. Open http://127.
 
    A legacy public `anon` key also works in the second value. **Never use a service-role/secret key in a `NEXT_PUBLIC_` variable.**
 
-4. In Authentication → Providers, enable Email and **keep Confirm email enabled**. Set the minimum password length to **10**. The database also independently requires verified school email before any student can create or join clubs.
+4. In Authentication → Providers, enable Email and **keep Confirm email enabled**. Set the minimum password length to **10**. The database also independently requires confirmed email before any account can create or join clubs.
 5. In Authentication → URL Configuration, set Site URL to the deployed website URL. Add the exact deployed homepage URL and `http://127.0.0.1:3000` to Redirect URLs. Sign-up confirmations and password reset emails return to the homepage; the browser handles the recovery session and opens the new-password form.
 6. Configure [custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) for real students. Supabase's default email service is for testing and restricts recipients; production school verification needs a working email provider. Keep the built-in confirmation/reset email links (`{{ .ConfirmationURL }}`).
 7. Run **supabase/profile-admin.sql** after the base schema. For the existing connected school project, run only this additive migration; do not rerun schema.sql. It adds private profile actions, ownership and role management, editable Shanyrak leaders, and the government roster.
-8. Register and verify **qurmangali_n63@hbalm.nis.edu.kz**, then run **supabase/grant-owner.sql** once. Ownership is protected; it can later be transferred to a verified administrator from the control panel.
-9. Open the account menu → **My profile → Admin**. Manage published/draft events, clubs, scores, community leaders/archives, the government roster, and administrator roles. Public pages have no extra administration controls. School members cannot promote themselves.
+8. Run **supabase/open-email-registration.sql**. This allows valid personal and corporate email addresses, adds private contact numbers and their caller-only editing RPC, and preserves all existing accounts and administrator roles. For the currently connected project, run only this migration; schema.sql and profile-admin.sql are already installed.
+9. Register and verify **qurmangali_n63@hbalm.nis.edu.kz**, then run **supabase/grant-owner.sql** once. Ownership is protected; it can later be transferred to a verified administrator from the control panel.
+10. Open the account menu → **My profile → Admin**. Manage published/draft events, clubs, scores, community leaders/archives, the government roster, and administrator roles. Public pages have no extra administration controls. School members cannot promote themselves.
 
 ## Deploy to Vercel
 
@@ -73,7 +74,7 @@ The website refreshes data on page load and when the browser tab regains focus. 
 
 ## Security and verification
 
-Passwords are securely managed by Supabase Auth; the application never stores plaintext passwords. Emails stay in Auth, while `profiles` holds the student's name and role. Profiles/memberships are private; only aggregate member counts are public. Database policies enforce the school domain and verification, ownership, and administrator privileges even if someone bypasses the UI. Account sessions are managed by Supabase's browser client; Zustand holds UI state and does not persist passwords.
+Passwords are securely managed by Supabase Auth; the application never stores plaintext passwords. Emails stay in Auth, while `profiles` holds the student's name and role. Profiles/memberships are private; only aggregate member counts are public. Database policies enforce email verification, private contact access, ownership, and administrator privileges even if someone bypasses the UI. Account sessions are managed by Supabase's browser client; Zustand holds UI state and does not persist passwords.
 
 ```sh
 npm run typecheck
@@ -102,7 +103,13 @@ Current roster: 19 Shanyraks. Алатау is archived by the migration and excl
 
 - **My profile** changes names through a caller-only database function. Password changes require the current password. Account deletion requires both the current password and typed school email, then removes the account and its clubs/memberships through a caller-only database function.
 - Verified admins may grant/revoke roles of other verified school accounts. The owner is protected from role revocation; self-demotion is disabled and the last verified administrator cannot delete their account. The owner must transfer ownership before deleting their account.
-- Passwords stay in Supabase Auth. No service-role credential is shipped to the browser. Every administrator operation is guarded by database authorization. User names/emails are available only to verified administrators through a bounded private search function.
+- Passwords stay in Supabase Auth. No service-role credential is shipped to the browser. Every administrator operation is guarded by database authorization. User names/emails are available only to verified administrators through bounded private search functions.
 - The single local **Onest** variable font covers all Kazakh uppercase/lowercase letters; its OFL license is bundled in public/fonts.
-- Changing email is intentionally unavailable: accounts remain restricted to the school domain.
+- Both personal and corporate email addresses are accepted. Existing corporate accounts remain valid. Email editing is not added to the profile in this update.
 
+
+## Contact numbers without SMS
+
+New registrations ask for an international contact number (for example +7 700 123 45 67). Spaces, parentheses and hyphens are normalized; the saved form is E.164-shaped. The number is not verified and is never used as login, recovery, school-affiliation or administrator-role proof. Existing accounts may add, edit or remove it in My profile. Profiles are private under RLS; only the account holder and verified administrators can read contact numbers. Public club/community responses do not expose them.
+
+No SMS provider is connected and no SMS is sent. This can run within Supabase and Resend free-plan quotas; email confirmation/recovery still uses the configured SMTP provider. Verified personal-email accounts can create and join clubs; no manual school-approval gate has been added.

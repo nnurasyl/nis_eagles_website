@@ -13,7 +13,7 @@ import { useEagles } from '@/lib/store';
 import {useTranslation, useLanguage, isLanguage, LANGUAGE_NAMES, authError, translate, LOCALES, memberCount, shanyrakCount, type Language} from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import { loadPublicData, loadStudent, joinClub } from '@/lib/data';
-import { CATEGORIES, isSchoolEmail, normalizeEmail, validateClub, validPassword } from '@/lib/validation';
+import { CATEGORIES, isValidEmail, normalizePhone, validContactPhone, normalizeEmail, validateClub, validPassword } from '@/lib/validation';
 import type { Club, SchoolEvent } from '@/lib/types';
 import {ProfilePage,AdminPage} from './account-pages';
 import {schoolDate,schoolMonth,schoolDay,schoolTime} from '@/lib/school-date';
@@ -79,13 +79,15 @@ function AuthDialog({mode}:{mode:'signin'|'signup'|'forgot'|'reset'}) {
   const {t, language, locale} = useTranslation();
   const {open, notify} = useEagles();
   const [email, setEmail] = useState(''); const [name, setName] = useState(''); const [password, setPassword] = useState('');
+  const [phone,setPhone]=useState('');
   const [confirmPassword,setConfirmPassword]=useState('');
   const [showPassword, setShowPassword] = useState(false); const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [sent, setSent] = useState(false);
   const signup = mode === 'signup', forgot = mode === 'forgot', reset = mode === 'reset';
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError('');
-    if (!reset && !isSchoolEmail(email)) {setError('Please use your @hbalm.nis.edu.kz school email.'); return;}
+    if (!reset && !isValidEmail(email)) {setError('Please enter a valid email address.'); return;}
     if (signup && (name.trim().length < 2 || name.trim().length > 60)) {setError('Please enter your name in 2–60 characters.'); return;}
+    if (signup && !validContactPhone(phone)) {setError('Enter a phone number with country code, such as +7 700 123 45 67.');return;}
     if ((signup || reset) && !validPassword(password)) {setError('Use a password with 10–128 characters.'); return;}
     if (reset && password!==confirmPassword) {setError('Passwords do not match.');return;}
     if (!supabase) {setError('School accounts are not connected yet. The site administrator needs to complete the database setup.'); return;}
@@ -99,7 +101,7 @@ function AuthDialog({mode}:{mode:'signin'|'signup'|'forgot'|'reset'}) {
         const result = await supabase.auth.updateUser({password}); if (result.error) throw result.error;
         notify("Your password has been updated."); open(null);
       } else if (signup) {
-        const result = await supabase.auth.signUp({email: normalized, password, options: {data: {name: name.trim()}, emailRedirectTo: window.location.origin}});
+        const result = await supabase.auth.signUp({email: normalized, password, options: {data: {name: name.trim(),contact_phone: normalizePhone(phone)}, emailRedirectTo: window.location.origin}});
         if (result.error) throw result.error;
         setPassword(''); setSent(true);
       } else {
@@ -109,17 +111,18 @@ function AuthDialog({mode}:{mode:'signin'|'signup'|'forgot'|'reset'}) {
       }
     } catch (err) {setError(authError(err, language));} finally {setBusy(false);}
   }
-  return <Modal title={sent ? t("Check your inbox.") : signup ? t("Your next move starts here.") : forgot ? t("Let’s get you back in.") : reset ? t("A fresh start.") : t("Welcome back, Eagle.")} subtitle={sent ? t("We’ve sent the next step to your school email, if this address is eligible.") : signup ? t("One school. A thousand possibilities. Join the community.") : forgot ? t("Enter your school email to receive a password reset link.") : reset ? t("Choose a new password for your school account.") : t("Sign in to join a club or bring your own idea to life.")} onClose={() => open(null)}>
+  return <Modal title={sent ? t("Check your inbox.") : signup ? t("Your next move starts here.") : forgot ? t("Let’s get you back in.") : reset ? t("A fresh start.") : t("Welcome back, Eagle.")} subtitle={sent ? t("If this address is eligible, we have sent instructions to your email.") : signup ? t("One school. A thousand possibilities. Join the community.") : forgot ? t("Enter your email to receive a password reset link.") : reset ? t("Choose a new password for your account.") : t("Sign in to join a club or bring your own idea to life.")} onClose={() => open(null)}>
     {sent ? <div className="email-sent"><Mail size={38}/><p>{t("Open the link in your email to continue. Check your spam folder too.")}</p><Button onClick={() => {setSent(false); open('signin');}}>{t("Back to sign in")} <ArrowRight size={18}/></Button></div> : <form onSubmit={submit} className="form">
       {signup && <label>{t("Your name")}<input required minLength={2} maxLength={60} value={name} onChange={e=>setName(e.target.value)} autoComplete="name" placeholder={t("First and last name")}/></label>}
-      {!reset && <label>{t("School email")}<input type="email" required maxLength={254} value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email" placeholder="your.name@hbalm.nis.edu.kz"/><span className="field-hint">{t("Exclusively for the NIS Almaty-Nauryzbay community.")}</span></label>}
+      {!reset && <label>{t("Email address")}<input type="email" required maxLength={254} value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email" placeholder="you@example.com"/></label>}
+      {signup&&<label>{t("Contact phone")}<input type="tel" inputMode="tel" required maxLength={32} autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+7 700 123 45 67"/></label>}
       {!forgot && <label>{reset ? t("New password") : t("Password")}<div className="password-field"><input type={showPassword ? 'text' : 'password'} required minLength={signup || reset ? 10 : 1} maxLength={128} value={password} onChange={e=>setPassword(e.target.value)} autoComplete={signup || reset ? 'new-password' : 'current-password'} placeholder={signup || reset ? t("At least 10 characters") : t("Your password")}/><button type="button" className="icon-button" aria-label={showPassword ? t("Hide password") : t("Show password")} onClick={()=>setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div></label>}
       {reset&&<label>{t("Confirm new password")}<input type="password" required minLength={10} maxLength={128} autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)}/></label>}
       {!signup && !forgot && !reset && <button className="text-link forgot-link" type="button" onClick={()=>open('forgot')}>{t("Forgot your password?")}</button>}
       {error && <p className="form-error" role="alert">{t(error)}</p>}
       <Button type="submit" className="full-width" disabled={busy}>{busy ? <LoaderCircle className="spin" size={18}/> : <>{forgot ? t("Send reset link") : reset ? t("Update password") : signup ? t("Create account") : t("Sign in")}<ArrowUpRight size={19}/></>}</Button>
       {!reset && <p className="switch-auth">{forgot ? t("Remembered it?") : signup ? t("Already part of the community?") : t("New to NIS Eagles?")} <button type="button" className="text-link" onClick={()=>open(signup || forgot ? 'signin' : 'signup')}>{signup || forgot ? t("Sign in") : t("Create an account")}</button></p>}
-      <div className="auth-note"><ShieldCheck size={16}/>{t("Your school email stays private.")}</div>
+      <div className="auth-note"><ShieldCheck size={16}/>{t("Your email and contact number stay private.")}</div>
     </form>}
   </Modal>;
 }
@@ -131,7 +134,7 @@ function CreateClubDialog() {
     event.preventDefault(); const form = new FormData(event.currentTarget);
     const input = {name: String(form.get('name')).trim(), description: String(form.get('description')).trim(), category: String(form.get('category')), meeting: String(form.get('meeting')).trim()};
     const validation = validateClub(input); if(validation) {setError(validation);return;}
-    if(!student || !supabase) {setError('Please sign in with your verified school account.');return;}
+    if(!student || !supabase) {setError('Please sign in with your verified account.');return;}
     setBusy(true);setError('');
     try {
       const result = await supabase.from('clubs').insert({...input,owner_id: student.id});
@@ -145,7 +148,7 @@ function CreateClubDialog() {
     <label>{t("Category")}<select name="category" defaultValue="Academic">{CATEGORIES.map(x=><option key={x} value={x}>{t(x)}</option>)}</select></label>
     <label>{t("What’s your club about?")}<textarea name="description" required minLength={20} maxLength={500} rows={4} placeholder={t("What will you do together? Who should join?")}/></label>
     <label>{t("When & where")}<input name="meeting" required minLength={3} maxLength={100} placeholder={t("e.g. Fridays, 15:30 · Room 204")}/></label>
-    <p className="field-hint">{t("Your club will be visible to everyone. Only verified school accounts can join.")}</p>
+    <p className="field-hint">{t("Your club will be visible to everyone. Accounts with confirmed email can join.")}</p>
     {error && <p className="form-error" role="alert">{t(error)}</p>}<Button disabled={busy} className="full-width" type="submit">{busy ? <LoaderCircle size={18} className="spin"/> : <>{t("Publish your club")}<ArrowUpRight size={19}/></>}</Button>
   </form></Modal>;
 }
@@ -222,14 +225,14 @@ export function EaglesApp({page='home'}:{page?:Page}) {
     const resolve=async()=>{
       const {data,error}=await client.auth.getUser();
       if(!alive)return;
-      if(data.user && !error && isSchoolEmail(data.user.email??''))await loadStudent(data.user.id,data.user.email!);
+      if(data.user && !error && isValidEmail(data.user.email??''))await loadStudent(data.user.id,data.user.email!);
       else useEagles.getState().set({student:null,memberships:[],showMyClubs:false});
       useEagles.getState().set({authReady:true});
     };void resolve();
     const {data:listener}=client.auth.onAuthStateChange((event,session)=>{
       if(event==='SIGNED_OUT')useEagles.getState().set({student:null,memberships:[],showMyClubs:false});
       if(event==='PASSWORD_RECOVERY')useEagles.getState().open('reset');
-      if(session?.user && isSchoolEmail(session.user.email??''))setTimeout(()=>{if(alive)void loadStudent(session.user.id,session.user.email!);},0);
+      if(session?.user && isValidEmail(session.user.email??''))setTimeout(()=>{if(alive)void loadStudent(session.user.id,session.user.email!);},0);
     });
     const refresh=()=>{void loadPublicData();void resolve();};window.addEventListener('focus',refresh);
     return()=>{alive=false;listener.subscription.unsubscribe();window.removeEventListener('focus',refresh);};
@@ -297,7 +300,7 @@ export function EaglesApp({page='home'}:{page?:Page}) {
       </>}
       {page==='shanyraks'&&<>
         <section className="page-intro"><motion.div {...fade}><p className="page-kicker">{t("Different classes. Shared spirit.")}</p><h1>{t("One school.")}<br/>{' '}<span>{shanyrakCount(shanyraks.length, language)}.</span></h1><p>{t("A Shanyrak brings two, three, or four classes together.")}<br/>{' '}{t("Every great story starts at zero.")}</p></motion.div></section>
-        <section className="section standings-section" id="shanyraks"><div className="standings-panel"><div className="standings-header"><span><Trophy size={17}/>{t("Shanyrak standings")}</span><span className="season-pill"><span/>2026–2027</span></div><div className="standings-grid">{sorted.map((item,index)=>{const rank=sorted.findIndex(x=>x.points===item.points)+1;const tied=sorted.filter(x=>x.points===item.points).length>1;return <div className="standing-row" key={item.id}><span className="standing-rank">{tied?'=':''}{rank}</span><span className={clsx('shanyrak-avatar',tones[index%tones.length])}><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="12" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M6 18h24M18 6v24M9.5 9.5l17 17M26.5 9.5l-17 17" stroke="currentColor" strokeWidth="1.5"/><circle cx="18" cy="18" r="4" fill="currentColor"/></svg></span><div className="standing-community"><h2 lang="kk">{item.name}</h2><p className="standing-leader" lang="kk">{item.leader_name !== undefined ? item.leader_name??'' : SHANYRAK_LEADERS[item.name]??''}</p></div><span className="standing-points">{item.points}<small>{t("PTS")}</small></span></div>;})}</div><p className="standings-note">{t("All Shanyraks begin at zero. Points will appear as the season unfolds.")}</p></div></section>
+        <section className="section standings-section" id="shanyraks"><div className="standings-panel"><div className="standings-header"><span><Trophy size={17}/>{t("Shanyrak standings")}</span><span className="season-pill">2026–2027</span></div><div className="standings-grid">{sorted.map((item,index)=>{const rank=sorted.findIndex(x=>x.points===item.points)+1;const tied=sorted.filter(x=>x.points===item.points).length>1;return <div className="standing-row" key={item.id}><span className="standing-rank">{tied?'=':''}{rank}</span><span className={clsx('shanyrak-avatar',tones[index%tones.length])}><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="12" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M6 18h24M18 6v24M9.5 9.5l17 17M26.5 9.5l-17 17" stroke="currentColor" strokeWidth="1.5"/><circle cx="18" cy="18" r="4" fill="currentColor"/></svg></span><div className="standing-community"><h2 lang="kk">{item.name}</h2><p className="standing-leader" lang="kk">{item.leader_name !== undefined ? item.leader_name??'' : SHANYRAK_LEADERS[item.name]??''}</p></div><span className="standing-points">{item.points}<small>{t("PTS")}</small></span></div>;})}</div><p className="standings-note">{t("All Shanyraks begin at zero. Points will appear as the season unfolds.")}</p></div></section>
       </>}
       {page==='ministries'&&<>
         <section className="page-intro team-intro"><motion.div {...fade}><p className="page-kicker">NIS Eagles · 2026–2027</p><h1>{t("Самоуправление")}</h1><p>{t("Руководство, министерства и лидеры Шаныраков.")}</p></motion.div></section>

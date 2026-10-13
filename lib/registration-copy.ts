@@ -1,0 +1,16 @@
+export const registrationMessages: Record<string,readonly [string,string,string]>={
+  'Email address':['Электрондық пошта','Электронная почта','Email address'],
+  'Contact phone':['Байланыс нөмірі','Номер для связи','Contact phone'],
+  'For contact only. No SMS verification.':['Нөмір байланыс үшін ғана. SMS арқылы расталмайды.','Номер только для связи. Без SMS-подтверждения.','For contact only. No SMS verification.'],
+  'School and personal email addresses are welcome.':['Мектеп немесе жеке поштаңды пайдалануға болады.','Подойдёт школьная или личная почта.','School and personal email addresses are welcome.'],
+  'Please enter a valid email address.':['Жарамды электрондық пошта мекенжайын енгіз.','Введи корректный адрес электронной почты.','Please enter a valid email address.'],
+  'Enter a phone number with country code, such as +7 700 123 45 67.':['Ел кодымен телефон нөмірін енгіз, мысалы: +7 700 123 45 67.','Введи номер с кодом страны, например: +7 700 123 45 67.','Enter a phone number with country code, such as +7 700 123 45 67.'],
+  'If this address is eligible, we have sent instructions to your email.':['Бұл мекенжай жарамды болса, поштаңа нұсқаулық жіберілді.','Если адрес подходит, мы отправили инструкцию на твою почту.','If this address is eligible, we have sent instructions to your email.'],
+  'Enter your email to receive a password reset link.':['Құпиясөзді қалпына келтіру үшін поштаңды енгіз.','Введи почту для восстановления пароля.','Enter your email to receive a password reset link.'],
+  'Choose a new password for your account.':['Тіркелгің үшін жаңа құпиясөз таңда.','Выбери новый пароль для аккаунта.','Choose a new password for your account.'],
+  'Your email and contact number stay private.':['Поштаң мен байланыс нөмірің көпшілікке көрсетілмейді.','Почта и номер не показываются публично.','Your email and contact number stay private.'],
+  'Please sign in with your verified account.':['Поштаңды растаған тіркелгімен кір.','Войди в аккаунт с подтверждённой почтой.','Please sign in with your verified account.'],
+  'Your club will be visible to everyone. Accounts with confirmed email can join.':['Клуб барлығына көрінеді. Поштасын растаған пайдаланушылар қосыла алады.','Клуб будет виден всем. Вступать могут пользователи с подтверждённой почтой.','Your club will be visible to everyone. Accounts with confirmed email can join.'],
+  'Type your email to confirm.':['Растау үшін поштаңды енгіз.','Введи свою почту для подтверждения.','Type your email to confirm.'],
+  'Only accounts with confirmed email can become admins.':['Тек поштасын растаған тіркелгілер әкімші бола алады.','Админом может стать только аккаунт с подтверждённой почтой.','Only accounts with confirmed email can become admins.'],
+};

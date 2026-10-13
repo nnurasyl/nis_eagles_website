@@ -1,3 +1,4 @@
+import {registrationMessages} from './registration-copy';
 import {accountMessages} from './account-copy';
 import {create} from 'zustand';
 
@@ -9,6 +10,7 @@ export function isLanguage(value: unknown): value is Language {return value === 
 // Keys are the original interface copy. Names and student-authored content stay intact.
 export const messages: Record<string, readonly [string, string, string]> = {
   ...accountMessages,
+  ...registrationMessages,
   'Home': ['Басты бет', 'Главная', 'Home'],
   'Клубы': ['Клубтар', 'Клубы', 'Clubs'],
   'Shanyraks': ['Шаңырақтар', 'Шаныраки', 'Shanyraks'],
@@ -198,7 +200,7 @@ export const messages: Record<string, readonly [string, string, string]> = {
   'Choose a club category.': ['Клуб санатын таңда.', 'Выбери категорию клуба.', 'Choose a club category.'],
   'Add a meeting time and place in 3–100 characters.': ['Кездесу уақыты мен орнын 3–100 таңбамен жаз.', 'Укажи время и место встречи в 3–100 символах.', 'Add a meeting time and place in 3–100 characters.'],
   'Invalid login credentials': ['Пошта немесе құпиясөз қате.', 'Неверная почта или пароль.', 'Incorrect email or password.'],
-  'Email not confirmed': ['Алдымен мектеп поштаңды раста.', 'Сначала подтверди школьную почту.', 'Please confirm your school email first.'],
+  'Email not confirmed': ['Алдымен поштаңды раста.', 'Сначала подтверди почту.', 'Please confirm your email first.'],
   'User already registered': ['Бұл поштаға тіркелгі ашылған.', 'Эта почта уже зарегистрирована.', 'This email is already registered.'],
   'Email rate limit exceeded': ['Хат жіберу шегіне жетті. Кейінірек қайтала.', 'Лимит отправки писем исчерпан. Попробуй позже.', 'Email limit reached. Please try later.'],
   'Email address not authorized': ['Бұл мекенжайға хат жіберу рұқсат етілмеген. Әкімшіге хабарлас.', 'Отправка на этот адрес не разрешена. Обратись к администратору.', 'Email delivery to this address is not authorized. Contact the administrator.'],

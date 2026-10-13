@@ -25,7 +25,7 @@ export async function loadStudent(id: string, email: string) {
   const {data: currentSession} = await supabase.auth.getSession();
   if(currentSession.session?.user.id !== id) return;
   if (profile.error || membership.error) { useEagles.getState().set({student:null,memberships:[]}); useEagles.getState().notify('Your school profile could not be loaded. Please sign in again.', true); return; }
-  const student: Student = {id, email, name: profile.data.name, isAdmin: profile.data.is_admin, isOwner: profile.data.is_owner ?? false};
+  const student: Student = {id, email, name: profile.data.name, isAdmin: profile.data.is_admin, isOwner: profile.data.is_owner ?? false, contactPhone: profile.data.contact_phone ?? null};
   useEagles.getState().set({student, memberships: membership.data.map((row) => row.club_id)});
 }
 export async function joinClub(id: string) {

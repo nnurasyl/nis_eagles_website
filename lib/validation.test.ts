@@ -1,12 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isSchoolEmail, normalizeEmail, validateClub, validPassword } from './validation';
+import { isValidEmail, normalizePhone, validContactPhone, normalizeEmail, validateClub, validPassword } from './validation';
 import { INITIAL_SHANYRAKS } from './shanyraks';
-test('school address restriction rejects lookalike domains and malformed addresses', () => {
-  for (const email of ['person@gmail.com','@hbalm.nis.edu.kz','person@hbalm.nis.edu.kz.evil.com','person@other.nis.edu.kz','person space@hbalm.nis.edu.kz','x@@hbalm.nis.edu.kz']) assert.equal(isSchoolEmail(email),false);
-  assert.equal(isSchoolEmail('Student@hbalm.nis.edu.kz'),true);
-  assert.equal(normalizeEmail(' Student@hbalm.nis.edu.kz '),'student@hbalm.nis.edu.kz');
+test('Personal and corporate emails are accepted; malformed addresses are rejected',()=>{
+  for(const email of ['person@gmail.com','name+club@outlook.com','Student@hbalm.nis.edu.kz','person@mail.kz'])assert.equal(isValidEmail(email),true,email);
+  for(const email of ['@gmail.com','person space@gmail.com','x@@gmail.com','.x@gmail.com','x..y@gmail.com','x.@gmail.com','x@-gmail.com','x@gmail-.com','x@gmail','x@gmail.c','x@gmail.123','a'.repeat(65)+'@gmail.com'])assert.equal(isValidEmail(email),false,email);
+  assert.equal(normalizeEmail(' Student@Gmail.com '),'student@gmail.com');
 });
+test('Contact numbers normalize harmless formatting and require an international prefix',()=>{
+  assert.equal(normalizePhone('+7 (700) 123-45-67'),'+77001234567');
+  for(const number of ['+7 (700) 123-45-67','+1 202 555 0123','+44 20 7946 0123'])assert.equal(validContactPhone(number),true,number);
+  for(const number of ['','87001234567','+0 123456789','+7 abc 1234567','+1234567890123456','+123'])assert.equal(validContactPhone(number),false,number);
+});
+
 test('club validation checks bounds and category', () => {
   const good = {name:'Debate Club',description:'A place to practise public speaking.',category:'Academic',meeting:'Friday · Room 204'};
   assert.equal(validateClub(good),null);
