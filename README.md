@@ -5,7 +5,7 @@ A responsive student government website for NIS Almaty-Nauryzbay. Built with Nex
 ## What is included
 
 - Your `back1.jpeg` hero photo at **50% opacity** and your `eagles.jpeg` logo, both bundled in `public/`.
-- All 17 supplied Shanyrak leader names are shown in the standings and student government. Алатау, Алаш, and Жетісу intentionally have no name. The source photo is included in `references/shanyrakname.jpeg`, outside publicly served assets.
+- All 19 supplied Shanyrak leader names are shown in the standings and student government. Алмалы replaces Жетісу and is led by Өмірбек Инеш; Алаш is led by Назаркина Алима Станиславовна. The source photo is included in `references/shanyrakname.jpeg`, outside publicly served assets.
 - Shanyraks are described as unions of two, three, or four classes.
 - Responsive desktop/mobile navigation, bold typography, animation with reduced-motion support, keyboard-accessible dialogs, search and category filters.
 - Kazakh (default), Russian, and English interface; language choice persists locally. All navigation, forms, status messages, categories, roles, date formatting, and participant counts are localized. People/Shanyrak names and student-written club/event content keep their original spelling.
@@ -13,8 +13,8 @@ A responsive student government website for NIS Almaty-Nauryzbay. Built with Nex
 - Student-created clubs, school-only membership, founder membership automatically added, accurate member counts, and founder deletion.
 - Events on the homepage: an Events heading and a clear “Пока событий нет.” message when there are none, event details and calendar downloads when published. Administrators can publish and remove events.
 - Separate `/clubs`, `/shanyraks`, and `/ministries` pages, keeping the homepage focused on a brief welcome, three navigation links, and events.
-- All 20 Shanyraks from the provided screenshot on `/shanyraks`, initialized to zero. Equal scores display as tied.
-- A ministries page with the president, council leadership, and nine ministry roles. Names remain in Kazakh. Finance: Әбдіқайым Гүлжауһар. Ecology has no assigned name.
+- All 19 Shanyraks from the provided screenshot on `/shanyraks`, initialized to zero. Equal scores display as tied.
+- A ministries page with the president, council leadership, and nine ministry roles. Names remain in Kazakh. Finance: Әбдіқайым Гүлжауһар. Ecology: Сәрсенбек Камилла.
 - An airy visual style based on the Satify reference: floating white navigation, centered headings, pastel accents, pill buttons, generous spacing.
 
 There are **no invented live clubs or events**, and no fake login. The club directory shows a clear empty state until students publish clubs. Without database environment values, the public design works, but account actions explain that setup is still required.
@@ -34,7 +34,7 @@ On Windows PowerShell, use `Copy-Item .env.example .env.local`. Open http://127.
 ## Connect the school database (one-time setup)
 
 1. Create a [Supabase project](https://supabase.com/dashboard). Use a **new project dedicated to this school**: the schema intentionally prevents non-school accounts throughout its Auth service.
-2. In its SQL Editor, run **`supabase/schema.sql` once**. This creates profiles, clubs, private memberships, events, and the 20 zero-point Shanyraks, plus row-level permissions and server-side school-domain checks.
+2. In its SQL Editor, run **`supabase/schema.sql` once**. This creates profiles, clubs, private memberships, events, and the 19 zero-point Shanyraks, plus row-level permissions and server-side school-domain checks.
 3. From the project Connect/API settings, copy the project URL and **publishable key** into `.env.local`:
 
    ```dotenv
@@ -76,7 +76,7 @@ Vercel hosting does not create a database or email service automatically. The ab
 All scores begin at zero. An authorized administrator can update them in the Supabase Table Editor, or through the SQL Editor:
 
 ```sql
-update public.shanyraks set points = 10 where name = 'Алатау';
+update public.shanyraks set points = 10 where name = 'Алаш';
 ```
 
 The website refreshes data on page load and when the browser tab regains focus. It does not claim real-time streaming. Event times are entered/displayed in Almaty (UTC+5). Only published future events appear on the homepage. Calendar reminders reserve one hour.
@@ -93,7 +93,7 @@ npm run build
 
 For an optional database permission check, run `supabase/security-checks.sql` in a disposable Supabase test project after applying the schema. It creates transaction-only fixtures, checks authorization, and rolls everything back. Run against a test project rather than a live school project.
 
-The supplied Supabase project is connected locally in ignored `.env.local`. Its public club/event reads and all 20 zero-point Shanyraks were checked; anonymous profile and membership reads were rejected. Email auth is enabled and email confirmation is required. A real verified school account is still needed to verify SMTP delivery, sign-in, and authenticated club creation end to end.
+The supplied Supabase project is connected locally in ignored `.env.local`. Its public club/event reads and all 19 zero-point Shanyraks were checked; anonymous profile and membership reads were rejected. Email auth is enabled and email confirmation is required. A real verified school account is still needed to verify SMTP delivery, sign-in, and authenticated club creation end to end.
 
 The source ZIP includes `.env.local` with the user-supplied public URL and publishable key for local running. Vercel needs these same two values entered in its Environment Variables settings; ignored local environment files are not uploaded by Git. No secret/service-role/database-password credentials are used.
 
@@ -104,3 +104,6 @@ The production build uses Next.js Webpack (`next build --webpack`) to avoid a lo
 - [Supabase password authentication](https://supabase.com/docs/guides/auth/passwords)
 - [Supabase row-level security](https://supabase.com/docs/guides/database/postgres/row-level-security)
 - [Next.js deployment on Vercel](https://vercel.com/docs/frameworks/full-stack/nextjs)
+
+
+Current roster: 19 Shanyraks. Алатау is excluded from site queries, including existing Supabase projects. Existing stored rows are preserved. The homepage and ranking heading derive their community count from the loaded roster.

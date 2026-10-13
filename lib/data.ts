@@ -8,7 +8,7 @@ export async function loadPublicData() {
   const [clubs, events, shanyraks] = await Promise.all([
     supabase.from('club_directory').select('*').order('created_at', {ascending: false}),
     supabase.from('events').select('id,title,description,starts_at,location').eq('published', true).gte('starts_at', new Date().toISOString()).order('starts_at'),
-    supabase.from('shanyraks').select('*').order('id'),
+    supabase.from('shanyraks').select('*').neq('name', 'Алатау').order('id'),
   ]);
   state.set({loading: false});
   if (clubs.error || events.error || shanyraks.error) { state.notify('School data could not be loaded. Please try again.', true); return; }

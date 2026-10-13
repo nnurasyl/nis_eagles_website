@@ -10,7 +10,7 @@ import {Globe2, Newspaper, GraduationCap, Shield, Leaf, Wallet, Crown} from 'luc
 import {PRESIDENT, LEADERSHIP, MINISTRIES} from '@/lib/government';
 import {SHANYRAK_LEADERS} from '@/lib/shanyrak-leaders';
 import { useEagles } from '@/lib/store';
-import {useTranslation, useLanguage, isLanguage, LANGUAGE_NAMES, authError, translate, LOCALES, memberCount, type Language} from '@/lib/i18n';
+import {useTranslation, useLanguage, isLanguage, LANGUAGE_NAMES, authError, translate, LOCALES, memberCount, shanyrakCount, type Language} from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import { loadPublicData, loadStudent, joinClub } from '@/lib/data';
 import { CATEGORIES, isSchoolEmail, normalizeEmail, validateClub, validPassword } from '@/lib/validation';
@@ -294,7 +294,7 @@ export function EaglesApp({page='home'}:{page?:Page}) {
         </section>
         <section className="home-paths section"><motion.div {...fade}><div className="center-heading"><p className="page-kicker">{t("Your community, one step at a time")}</p><h2>{t("A little curiosity.")}<br/>{' '}{t("A place to call yours.")}</h2></div><div className="path-grid">
           <Link href="/clubs" className="path-card"><span className="path-icon sky"><Users size={23}/></span><h3>{t("Клубы")}</h3><p>{t("Discover a shared interest.")}<br/>{' '}{t("Or start something of your own.")}</p><ArrowUpRight className="path-arrow" size={20}/></Link>
-          <Link href="/shanyraks" className="path-card"><span className="path-icon lilac"><Trophy size={23}/></span><h3>{t("Back your Shanyrak")}</h3><p>{t("20 communities.")}<br/>{' '}{t("One school spirit.")}</p><ArrowUpRight className="path-arrow" size={20}/></Link>
+          <Link href="/shanyraks" className="path-card"><span className="path-icon lilac"><Trophy size={23}/></span><h3>{t("Back your Shanyrak")}</h3><p>{shanyrakCount(shanyraks.length, language)}.<br/>{' '}{t("One school spirit.")}</p><ArrowUpRight className="path-arrow" size={20}/></Link>
           <Link href="/ministries" className="path-card"><span className="path-icon peach"><Sparkles size={23}/></span><h3>{t("Meet your team")}</h3><p>{t("The people bringing")}<br/>{' '}{t("our ideas to life.")}</p><ArrowUpRight className="path-arrow" size={20}/></Link>
         </div></motion.div></section>
         <section className="events-section section" id="events"><motion.div {...fade}><div className="events-heading"><h2 id="events-title">{t("Events")}</h2>{student?.isAdmin&&<Button className="add-event-button" onClick={()=>open('event')}><Plus size={16}/>{t("Add event")}</Button>}</div>
@@ -311,7 +311,7 @@ export function EaglesApp({page='home'}:{page?:Page}) {
         </section>
       </>}
       {page==='shanyraks'&&<>
-        <section className="page-intro"><motion.div {...fade}><p className="page-kicker">{t("Different classes. Shared spirit.")}</p><h1>{t("One school.")}<br/>{' '}<span>{t("Twenty communities.")}</span></h1><p>{t("A Shanyrak brings two, three, or four classes together.")}<br/>{' '}{t("Every great story starts at zero.")}</p></motion.div></section>
+        <section className="page-intro"><motion.div {...fade}><p className="page-kicker">{t("Different classes. Shared spirit.")}</p><h1>{t("One school.")}<br/>{' '}<span>{shanyrakCount(shanyraks.length, language)}.</span></h1><p>{t("A Shanyrak brings two, three, or four classes together.")}<br/>{' '}{t("Every great story starts at zero.")}</p></motion.div></section>
         <section className="section standings-section" id="shanyraks"><div className="standings-panel"><div className="standings-header"><span><Trophy size={17}/>{t("Shanyrak standings")}</span><span className="season-pill"><span/>2026–2027</span></div><div className="standings-grid">{sorted.map((item,index)=>{const rank=sorted.findIndex(x=>x.points===item.points)+1;const tied=sorted.filter(x=>x.points===item.points).length>1;return <div className="standing-row" key={item.id}><span className="standing-rank">{tied?'=':''}{rank}</span><span className={clsx('shanyrak-avatar',tones[index%tones.length])}><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="12" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M6 18h24M18 6v24M9.5 9.5l17 17M26.5 9.5l-17 17" stroke="currentColor" strokeWidth="1.5"/><circle cx="18" cy="18" r="4" fill="currentColor"/></svg></span><div className="standing-community"><h2 lang="kk">{item.name}</h2><p className="standing-leader" lang="kk">{SHANYRAK_LEADERS[item.name]??''}</p></div><span className="standing-points">{item.points}<small>{t("PTS")}</small></span></div>;})}</div><p className="standings-note">{t("All Shanyraks begin at zero. Points will appear as the season unfolds.")}</p></div></section>
       </>}
       {page==='ministries'&&<>

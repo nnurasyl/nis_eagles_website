@@ -16,7 +16,7 @@
 - 60 browser checks: four pages × three languages × 320/390/768/1024/1440 px widths. No horizontal overflow, heading/name/role clipping, or overlapping header groups was observed.
 - Mobile menu and registration modal work at 320 px. Russian sign-in rejects non-school email with a localized message before calling Auth. Language persistence was checked after reload.
 - Corrected word spacing when mobile cards hide line breaks. Localized tab titles are preserved against streamed Next.js metadata.
-- President, council, nine ministries, and 20 Shanyrak leader rows remain intact. Finance: Әбдіқайым Гүлжауһар; ecology blank. Алатау, Алаш, Жетісу leader names remain blank.
+- President, council, nine ministries, and 19 active Shanyrak leader rows are shown. Finance: Әбдіқайым Гүлжауһар; ecology: Сәрсенбек Камилла. Алаш: Назаркина Алима Станиславовна. Алмалы: Өмірбек Инеш. Алатау is excluded from the site; all active Shanyraks have a supplied leader name.
 
 ## Automated checks and build
 
@@ -33,3 +33,14 @@ The PostgreSQL schema ran successfully in PGlite with Supabase Auth stubs. Check
 ## Delivery
 
 The running project is C:/Users/Lenovo/Desktop/nis-eagles on http://127.0.0.1:3000/. The task deliverable is outputs/nis-eagles and its ZIP. Public .env.local is included in the ZIP for local running and ignored by Git. For Vercel, enter the two environment variables in its project settings. No Vercel deployment has been made.
+
+
+## Latest roster changes
+
+- Changes made directly in C:/Users/Lenovo/Desktop/nis-eagles.
+- Supabase row 11 was renamed from Жетісу to Алмалы through a transaction; ID and zero points were preserved.
+- Алатау is excluded from the public site query and both lists. Its existing database row is preserved; new-project schema seeds only the 19 active Shanyraks.
+- Homepage and ranking heading derive the number from the active roster, with localized grammar.
+- Seven existing tests and the optimized production build passed in the Desktop project.
+- Browser checks confirmed 19 rows, no Алатау or Жетісу in either list, and all corrected names. Changed pages passed at 320/390/768/1024/1440 px; final counts were checked on all three languages at 320 and 1440 px.
+- Server runs from the Desktop project on http://127.0.0.1:3000/.

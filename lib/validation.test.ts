@@ -13,8 +13,8 @@ test('club validation checks bounds and category', () => {
   assert.ok(validateClub({...good,name:'a'})); assert.ok(validateClub({...good,description:'Short'}));
   assert.ok(validateClub({...good,category:'Invalid'})); assert.ok(validateClub({...good,meeting:''}));
 });
-test('all 20 Shanyraks begin at zero and passwords have bounds', () => {
-  assert.equal(INITIAL_SHANYRAKS.length,20); assert.equal(new Set(INITIAL_SHANYRAKS.map(x=>x.name)).size,20);
+test('all 19 Shanyraks begin at zero and passwords have bounds', () => {
+  assert.equal(INITIAL_SHANYRAKS.length,19); assert.equal(new Set(INITIAL_SHANYRAKS.map(x=>x.name)).size,19);
   assert.ok(INITIAL_SHANYRAKS.every(x=>x.points===0)); assert.equal(validPassword('short'),false);
   assert.equal(validPassword('a'.repeat(10)),true); assert.equal(validPassword('a'.repeat(129)),false);
 });

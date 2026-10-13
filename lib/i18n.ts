@@ -233,3 +233,11 @@ export function memberCount(count: number, language: Language): string {
   const form = new Intl.PluralRules('ru').select(count);
   return `${formatter.format(count)} ${form === 'one' ? 'участник' : form === 'few' ? 'участника' : 'участников'}`;
 }
+
+export function shanyrakCount(count: number, language: Language): string {
+  const number = new Intl.NumberFormat(LOCALES[language]).format(count);
+  if (language === 'kk') return `${number} шаңырақ`;
+  if (language === 'en') return `${number} ${count === 1 ? 'community' : 'communities'}`;
+  const form = new Intl.PluralRules('ru').select(count);
+  return `${number} ${form === 'one' ? 'сообщество' : form === 'few' ? 'сообщества' : 'сообществ'}`;
+}

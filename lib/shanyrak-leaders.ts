@@ -1,8 +1,6 @@
 // Names transcribed from the school list supplied by the user.
-// Алатау, Алаш, and Жетісу are intentionally left without a leader name.
 export const SHANYRAK_LEADERS: Record<string, string | null> = {
-  'Алатау': null,
-  'Алаш': null,
+  'Алаш': 'Назаркина Алима Станиславовна',
   'Алматы': 'Бекетаева Альнура',
   'Алтын емел': 'Сыдық Әбубәкір',
   'Атамекен': 'Қуатұлы Дәулет',
@@ -11,7 +9,7 @@ export const SHANYRAK_LEADERS: Record<string, string | null> = {
   'Жалын': 'Жүніс Ғабиден',
   'Жас Қанат': 'Дулатұлы Дияр',
   'Жетіген': 'Мейрамқызы Айсана',
-  'Жетісу': null,
+  'Алмалы': 'Өмірбек Инеш',
   'Көктөбе': 'Калдарбек Амина',
   'Медеу': 'Пугач Матвей Александрович',
   'Сарыарқа': 'Зейнелхан Эниша',

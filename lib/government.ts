@@ -13,6 +13,6 @@ export const MINISTRIES: GovernmentMember[] = [
   {id: 'education', name: 'Асылхан Айсұлу', role: 'Білім және ғылым министрі', icon: 'education'},
   {id: 'internal', name: 'Бекбай Айзере', role: 'Ішкі істер министрі', icon: 'shield'},
   {id: 'sport', name: 'Капиз Даниал', role: 'Спорт және салауатты өмір министрі', icon: 'sport'},
-  {id: 'ecology', name: null, role: 'Экология министрі', icon: 'ecology'},
+  {id: 'ecology', name: 'Сәрсенбек Камилла', role: 'Экология министрі', icon: 'ecology'},
   {id: 'finance', name: 'Әбдіқайым Гүлжауһар', role: 'Қаржы министрі', icon: 'finance'},
 ];
