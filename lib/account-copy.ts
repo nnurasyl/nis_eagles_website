@@ -1,4 +1,5 @@
 export const accountMessages: Record<string, readonly [string,string,string]> = {
+  'Could not load data.':['Деректерді жүктеу мүмкін болмады. Қайта көріңіз.','Не удалось загрузить данные. Попробуй снова.','Could not load data. Try again.'],
   'Loading…':['Деректер жүктелуде…','Загружаем данные…','Loading…'],
   'My profile':['Менің профилім','Мой профиль','My profile'],
   'Admin':['Әкімші','Админ','Admin'],

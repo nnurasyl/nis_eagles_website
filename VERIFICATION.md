@@ -96,3 +96,13 @@ The user requested recovery on www.niseagles.study for qurmangali_n63@hbalm.nis.
 - The personal-email form is published but open-email-registration.sql has not yet run. The SQL editor still shows Click Run to execute your query. Action-time confirmation for expanding enrollment is pending; no SMTP change or password action is needed for this failure.
 
 - After the user confirmed Apply now, executed open-email-registration.sql on the live production database. SQL Editor returned Success. No rows returned. All 11 read-only checks passed: personal/school emails, invalid-email rejection, old trigger removal, new trigger enabled, contact column, confirmation requirement, profile RLS, anonymous directory/contact edits denied, and owner/admin preserved. This supersedes the pending-migration notes above. End-to-end signup with a real email/password is left to the user; no credentials entered or email sent by the agent.
+
+
+## Admin user directory fix — 2026-10-14
+
+- Reproduced the live RPC error 42804: Auth email is character varying(255), but both directory functions declared text. Original PGlite fixtures used email text and missed this production compatibility issue.
+- Both admin_list_contacts and admin_list_students now select u.email::text. Applied additive fix-admin-directory.sql to the live project; privileges, verification and administrator guards stay unchanged. Corrected both setup migration sources too.
+- Six live checks pass: both directory functions return users, exact email search returns the owner, both anonymous RPC executions remain denied, and current owner administrator status remains true. Only counts/booleans were queried; no users or roles were modified.
+- Updated the fixture to varchar(255): it fails on the original code and passes on the corrected functions, including existing owner access, contact privacy, confirmed-email rules and migration reruns. Ten unit tests and production build pass.
+- Admin data-loading errors use their own localized message in kk/ru/en; failed People requests clear old rows. This interface change requires deployment to Vercel; the actual live directory fix already applies to the existing site.
+- Main local server was restarted on port 3000. No account credentials entered and no administrator roles granted or revoked during verification.

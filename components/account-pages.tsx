@@ -19,14 +19,14 @@ function Gate({admin=false}:{admin?:boolean}) {
   const {t}=useTranslation();const {authReady,student,open}=useEagles();
   return <><Heading title={t(admin?'Control panel':'My profile')}/><section className="section account-shell"><div className="account-card"><p>{!authReady?t('Loading…'):t(student?'Admin access required.':'Please sign in with your verified account.')}</p>{authReady&&!student&&<div className="account-actions"><Action onClick={()=>open('signin')}>{t('Sign in')}<ArrowUpRight size={17}/></Action><button className="text-link" onClick={()=>open('forgot')}>{t('Forgot your password?')}</button></div>}{student&&<Link className="text-link" href="/profile"><ArrowLeft size={16}/>{t('My profile')}</Link>}</div></section></>;
 }
-function operationError(error:unknown,t:(s:string)=>string) {
+function operationError(error:unknown,t:(s:string)=>string,fallback='Could not save changes.') {
   const value=error as {message?:string;code?:string};
   if(value.code==='PGRST202'||value.code==='42703'||value.code==='42P01')return t('Database update required.');
   if(value.message==='transfer_owner_first')return t('Transfer ownership before deleting your account.');
   if(value.message==='last_admin')return t('The school needs at least one verified admin.');
   if(value.message?.includes('access_required'))return t('Admin access required.');
   if(value.message?.includes('verified_'))return t('Account verification is required.');
-  return t('Could not save changes.');
+  return t(fallback);
 }
 
 export function ProfilePage(){
@@ -95,7 +95,7 @@ export function AdminPage(){
       const result=tab==='Events'?await supabase.from('events').select('*').order('starts_at',{ascending:false}):tab==='Клубы'?await supabase.from('clubs').select('*').order('created_at',{ascending:false}):tab==='Shanyraks'?await supabase.from('shanyraks').select('*').order('id'):tab==='Самоуправление'?await supabase.from('government_members').select('*'):await supabase.rpc('admin_list_contacts',{p_search:query.trim()});
       if(request!==generation.current)return;if(result.error)throw result.error;
       if(tab==='Events')setEvents(result.data??[]);else if(tab==='Клубы')setClubs(result.data??[]);else if(tab==='Shanyraks')setShanyraks(result.data??[]);else if(tab==='People')setPeople(result.data??[]);else setNames(Object.fromEntries((result.data??[]).map((x:{id:string;name:string|null})=>[x.id,x.name])));
-    }catch(err){if(request===generation.current)setError(operationError(err,t));}finally{if(request===generation.current)setLoading(false);}
+    }catch(err){if(request===generation.current){if(tab==='People')setPeople([]);setError(operationError(err,t,'Could not load data.'));}}finally{if(request===generation.current)setLoading(false);}
   },[tab,query,student?.isAdmin,t]);
   // t is stable only within a render; use an effect keyed by actual inputs to avoid fetch loops.
   const latestLoad=useRef(load);latestLoad.current=load;

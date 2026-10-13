@@ -10,7 +10,7 @@ A responsive student government website for NIS Almaty-Nauryzbay. Built with Nex
 - Responsive desktop/mobile navigation, bold typography, animation with reduced-motion support, keyboard-accessible dialogs, search and category filters.
 - Kazakh (default), Russian, and English interface; language choice persists locally. All navigation, forms, status messages, categories, roles, date formatting, and participant counts are localized. People/Shanyrak names and student-written club/event content keep their original spelling.
 - Personal or school email registration, email verification, sign-in/out, password recovery with confirmation, editable profile names/passwords, and self-account deletion.
-- Student-created clubs, school-only membership, founder membership automatically added, accurate member counts, and founder deletion.
+- Student-created clubs, verified-account membership, founder membership automatically added, accurate member counts, and founder deletion.
 - Events on the homepage: an Events heading and a clear “Пока событий нет.” message when there are none, event details and calendar downloads when published. Administrators can publish and remove events.
 - Separate `/clubs`, `/shanyraks`, and `/ministries` pages, keeping the homepage focused on a brief welcome, three navigation links, and events.
 - All 19 Shanyraks from the provided screenshot on `/shanyraks`, initialized to zero. Equal scores display as tied.
@@ -113,3 +113,8 @@ Current roster: 19 Shanyraks. Алатау is archived by the migration and excl
 New registrations ask for an international contact number (for example +7 700 123 45 67). Spaces, parentheses and hyphens are normalized; the saved form is E.164-shaped. The number is not verified and is never used as login, recovery, school-affiliation or administrator-role proof. Existing accounts may add, edit or remove it in My profile. Profiles are private under RLS; only the account holder and verified administrators can read contact numbers. Public club/community responses do not expose them.
 
 No SMS provider is connected and no SMS is sent. This can run within Supabase and Resend free-plan quotas; email confirmation/recovery still uses the configured SMTP provider. Verified personal-email accounts can create and join clubs; no manual school-approval gate has been added.
+
+
+## Directory compatibility fix
+
+The live project has supabase/fix-admin-directory.sql applied. For an existing database with the older directory functions, run this additive fix once. It casts Supabase Auth email varchar(255) to the declared text return type in admin_list_students and admin_list_contacts. Both initial migrations already include the fix; new setups do not need to run it separately. Roles and directory visibility remain unchanged.
