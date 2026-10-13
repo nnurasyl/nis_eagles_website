@@ -106,3 +106,13 @@ The user requested recovery on www.niseagles.study for qurmangali_n63@hbalm.nis.
 - Updated the fixture to varchar(255): it fails on the original code and passes on the corrected functions, including existing owner access, contact privacy, confirmed-email rules and migration reruns. Ten unit tests and production build pass.
 - Admin data-loading errors use their own localized message in kk/ru/en; failed People requests clear old rows. This interface change requires deployment to Vercel; the actual live directory fix already applies to the existing site.
 - Main local server was restarted on port 3000. No account credentials entered and no administrator roles granted or revoked during verification.
+
+
+## Ideas and administrator deletion — 2026-10-14
+
+- Added /ideas, homepage invitation and navigation/footer links. kk/ru/en translations and Onest typography match the existing style. Ideas are private to authors/admins; admin status updates are reflected in the author history.
+- Added typed-email confirmation for admin_delete_user. Self deletion remains in the profile; owner deletion is blocked in both UI and SQL. Owned clubs/memberships cascade; ideas retain content with a null author.
+- Applied ideas-admin.sql to live Supabase after explicit action-time user confirmation. No real account was deleted or real suggestion inserted. Six read-only live checks pass for RLS/private ideas, denied anonymous access, new authenticated RPC grants, denied direct writes, admin inbox query and preserved owner/directory.
+- PGlite fixtures use actual Auth email varchar(255). Tests pass for verified submission, length checks, rate limit, private author reads, no spoofing/direct edits, admin statuses, anonymous denial, wrong-confirmation rejection, self/owner protection, club/member cascades, author anonymization, migration reruns and preserved roles.
+- Isolated browser copy confirms submission and own history, admin status changes visible to author, deletion disabled for incorrect email and successful deletion of a reload-restorable fixture. No auth credentials entered. Layout checks cover laptop 1280 px and mobile 390/320 px; no horizontal overflow at 320 px. All three languages checked; viewport overrides reset.
+- Ten unit tests, TypeScript and production build pass. No Vercel publication performed; new frontend features require redeployment.

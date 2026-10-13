@@ -16,6 +16,7 @@ import { loadPublicData, loadStudent, joinClub } from '@/lib/data';
 import { CATEGORIES, isValidEmail, normalizePhone, validContactPhone, normalizeEmail, validateClub, validPassword } from '@/lib/validation';
 import type { Club, SchoolEvent } from '@/lib/types';
 import {ProfilePage,AdminPage} from './account-pages';
+import {IdeasPage} from './ideas-page';
 import {schoolDate,schoolMonth,schoolDay,schoolTime} from '@/lib/school-date';
 
 const fade = {initial: {opacity: 1, y: 12}, whileInView: {opacity: 1, y: 0}, viewport: {once: true, amount: 0.08}, transition: {duration: 0.55}};
@@ -183,8 +184,8 @@ function EventDetail({event,onClose}: {event:SchoolEvent;onClose:()=>void}) {
 function formatEvent(value:string, language:Language) {return schoolDate(value,language)+' · '+translate(language,'Almaty time');}
 
 
-type Page = 'home' | 'clubs' | 'shanyraks' | 'ministries' | 'profile' | 'admin';
-const navigation = [{href:'/',label:'Home',page:'home'},{href:'/clubs',label:'Клубы',page:'clubs'},{href:'/shanyraks',label:'Shanyraks',page:'shanyraks'},{href:'/ministries',label:'Самоуправление',page:'ministries'}] as const;
+type Page = 'home' | 'clubs' | 'shanyraks' | 'ministries' | 'profile' | 'admin' | 'ideas';
+const navigation = [{href:'/',label:'Home',page:'home'},{href:'/clubs',label:'Клубы',page:'clubs'},{href:'/shanyraks',label:'Shanyraks',page:'shanyraks'},{href:'/ministries',label:'Самоуправление',page:'ministries'},{href:'/ideas',label:'Ideas',page:'ideas'}] as const;
 const ministryIcons = {code:Code2,globe:Globe2,media:Newspaper,culture:Palette,education:GraduationCap,shield:Shield,sport:Trophy,ecology:Leaf,finance:Wallet};
 const tones = ['sky','peach','mint','lilac','butter'];
 function initials(name:string){return name.split(' ').map(word=>word[0]).slice(0,2).join('');}
@@ -288,6 +289,7 @@ export function EaglesApp({page='home'}:{page?:Page}) {
         <section className="events-section section" id="events"><motion.div {...fade}><div className="events-heading"><h2 id="events-title">{t("Events")}</h2></div>
           <div className={clsx('events-box',events.length===0&&'events-box-empty')} role="list" aria-labelledby="events-title">{events.length===0&&<div className="event-empty" role="listitem"><p>{loading?t("Загружаем события…"):t("Пока событий нет.")}</p></div>}{events.map(event=><article key={event.id} className="event-row" role="listitem"><div className="event-date"><span>{schoolMonth(event.starts_at,language)}</span><strong>{schoolDay(event.starts_at)}</strong></div><div className="event-info"><h3>{event.title}</h3><p><MapPin size={14}/>{event.location}<span>·</span>{schoolTime(event.starts_at)}</p></div><Button className="event-button" onClick={()=>setSelectedEvent(event)}>{t("Event details")}<ArrowUpRight size={16}/></Button></article>)}</div>
         </motion.div></section>
+        <section className="section home-ideas"><div><span className="page-kicker">{t("Idea box")}</span><h2>{t("What would make our school better?")}</h2><p>{t("Suggest a change, share an opinion, or bring a new idea.")}</p></div><Link href="/ideas" className="button">{t("Send an idea")}<ArrowUpRight size={17}/></Link></section>
       </>}
       {page==='clubs'&&<>
         <section className="page-intro"><motion.div {...fade}><p className="page-kicker">{t("Student-led. Everyone welcome.")}</p><h1>{t("Клубы")}</h1><p>{t("A shared interest is all it takes.")}<br/>{' '}{t("Join a club or bring your own idea to life.")}</p><Button onClick={startClub}>{t("Start a club")}<Plus size={17}/></Button></motion.div></section>
@@ -309,10 +311,11 @@ export function EaglesApp({page='home'}:{page?:Page}) {
         <section className="section shanyrak-council-section" aria-labelledby="shanyrak-leaders-title"><div className="subsection-heading"><h2 id="shanyrak-leaders-title">{t("Лидеры Шаныраков")}</h2></div><div className="shanyrak-council-list" role="list">{shanyraks.map((shanyrak,index)=><article className="shanyrak-council-row" key={shanyrak.id} role="listitem"><span className={clsx('shanyrak-avatar',tones[index%tones.length])} aria-hidden="true">{index+1}</span><div className="shanyrak-council-person"><h3 lang="kk">{shanyrak.name}</h3><p lang="kk">{shanyrak.leader_name !== undefined ? shanyrak.leader_name??'' : SHANYRAK_LEADERS[shanyrak.name]??''}</p></div></article>)}</div></section>
 
       </>}
+      {page==='ideas'&&<IdeasPage/>}
       {page==='profile'&&<ProfilePage/>}
       {page==='admin'&&<AdminPage/>}
     </main>
-    <footer className="footer"><div className="footer-top"><Link href="/" className="brand"><Eagle/><span>NIS Eagles</span></Link><nav aria-label={t("Footer navigation")}><Link href="/clubs">{t("Клубы")}</Link><Link href="/shanyraks">{t("Shanyraks")}</Link><Link href="/ministries">{t("Самоуправление")}</Link></nav><span className="footer-season">2026–2027</span></div><div className="footer-bottom"><p>NIS Almaty-Nauryzbay</p><a href="#main" className="text-link">{t("Back to top")}<ArrowUpRight size={15}/></a></div><p className="footer-credit">Powered by Kurmangali Nurassyl</p></footer>
+    <footer className="footer"><div className="footer-top"><Link href="/" className="brand"><Eagle/><span>NIS Eagles</span></Link><nav aria-label={t("Footer navigation")}><Link href="/clubs">{t("Клубы")}</Link><Link href="/shanyraks">{t("Shanyraks")}</Link><Link href="/ministries">{t("Самоуправление")}</Link><Link href="/ideas">{t("Ideas")}</Link></nav><span className="footer-season">2026–2027</span></div><div className="footer-bottom"><p>NIS Almaty-Nauryzbay</p><a href="#main" className="text-link">{t("Back to top")}<ArrowUpRight size={15}/></a></div><p className="footer-credit">Powered by Kurmangali Nurassyl</p></footer>
     <AnimatePresence>{modal&&['signin','signup','forgot','reset'].includes(modal)&&<AuthDialog mode={modal as 'signin'|'signup'|'forgot'|'reset'} key={modal}/>} {modal==='create'&&<CreateClubDialog key="create"/>}{selectedClub&&<ClubDetail key={selectedClub.id} club={selectedClub} onClose={()=>setSelectedClub(null)}/>} {selectedEvent&&<EventDetail key={selectedEvent.id} event={selectedEvent} onClose={()=>setSelectedEvent(null)}/>}</AnimatePresence>
     <AnimatePresence>{notice&&<motion.div role={notice.error?'alert':'status'} className={clsx('toast',notice.error&&'toast-error')} initial={{opacity:0,y:24,x:'-50%'}} animate={{opacity:1,y:0,x:'-50%'}} exit={{opacity:0,y:24,x:'-50%'}}>{notice.error?<X size={18}/>:<Check size={18}/>}<span>{t(notice.text)}</span><button className="icon-button" aria-label={t("Dismiss notification")} onClick={()=>useEagles.getState().set({notice:null})}><X size={17}/></button></motion.div>}</AnimatePresence>
   </MotionConfig>;

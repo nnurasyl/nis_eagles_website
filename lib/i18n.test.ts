@@ -17,7 +17,7 @@ test('Kazakh is the default; all three languages have complete non-empty copy', 
 });
 
 test('Every literal interface key, category, and government role has translations', () => {
-  const source = ['eagles-app.tsx','account-pages.tsx'].map(file=>fs.readFileSync(new URL('../components/'+file, import.meta.url),'utf8')).join('\n');
+  const source = ['eagles-app.tsx','account-pages.tsx','ideas-page.tsx'].map(file=>fs.readFileSync(new URL('../components/'+file, import.meta.url),'utf8')).join('\n');
   const tree = ts.createSourceFile('eagles-app.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   function visit(node: ts.Node) {
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 't' && ts.isStringLiteral(node.arguments[0])) {

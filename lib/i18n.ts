@@ -1,3 +1,4 @@
+import {ideasMessages} from './ideas-copy';
 import {registrationMessages} from './registration-copy';
 import {accountMessages} from './account-copy';
 import {create} from 'zustand';
@@ -9,6 +10,7 @@ export function isLanguage(value: unknown): value is Language {return value === 
 
 // Keys are the original interface copy. Names and student-authored content stay intact.
 export const messages: Record<string, readonly [string, string, string]> = {
+  ...ideasMessages,
   ...accountMessages,
   ...registrationMessages,
   'Home': ['Басты бет', 'Главная', 'Home'],

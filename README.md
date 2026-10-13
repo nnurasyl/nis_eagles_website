@@ -118,3 +118,12 @@ No SMS provider is connected and no SMS is sent. This can run within Supabase an
 ## Directory compatibility fix
 
 The live project has supabase/fix-admin-directory.sql applied. For an existing database with the older directory functions, run this additive fix once. It casts Supabase Auth email varchar(255) to the declared text return type in admin_list_students and admin_list_contacts. Both initial migrations already include the fix; new setups do not need to run it separately. Roles and directory visibility remain unchanged.
+
+
+## Ideas and administrator user deletion
+
+Run supabase/ideas-admin.sql after the existing migrations (already applied to the connected NIS Eagles project on 14 October 2026). /ideas is available from navigation, the footer and homepage. Verified accounts submit a title and suggestion; only the author and administrators can read it. Authors see New / Reviewing / Done status; admins manage the private inbox through the Ideas tab. Submission is limited to five ideas per rolling 24 hours.
+
+The People tab includes Delete user for other non-owner accounts. Deletion requires typing the target email; the backend independently validates admin status, confirmation, self/owner protection and the last-admin condition. Auth account, owned clubs and memberships are removed by cascades. Ideas remain with a null author. Real deletions cannot be undone from the website. All actions use private, server-guarded functions; the browser cannot directly write ideas or change roles.
+
+The existing project sources include all changes. Redeploy these sources to Vercel to publish the new page and buttons; the database migration is already applied.
